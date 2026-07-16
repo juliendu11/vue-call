@@ -24,6 +24,7 @@ menus, pickers — any UI that conceptually returns a value to its caller.
 - [Exit animations](#exit-animations)
 - [Passing Root props](#passing-root-props)
 - [Mutation flow](#mutation-flow)
+  - [Why not just await call()?](#why-not-just-await-call)
   - [Optional mutationFn](#optional-mutationfn)
   - [Payload](#payload)
 - [Multi-preview hosts (Storybook, Histoire, …)](#multi-preview-hosts-storybook-histoire-)
@@ -252,6 +253,23 @@ Root props are reactive: change the value passed to `<Confirm userName="..." />`
 # Mutation flow
 
 Use `useMutationFlow` from `vue-call/mutation-flow` to wire the call to an async action. The composable manages `pending` for you, and because closing the call requires an explicit `call.end()`, a `mutationFn` that doesn't reach `end` leaves the dialog open — the user can retry without losing their place.
+
+## Why not just await `call()`?
+
+`Confirm.call({...})` already returns a promise you can `await` — so what does `mutationFn` add? They answer two different questions:
+
+- **The promise from `.call()`** — *"when is the whole interaction done, and what's the result?"* This is for the caller, often far from the dialog itself (e.g. a "Delete" button in a list).
+- **`mutationFn` / `useMutationFlow`** — *"how does an async action triggered by a button inside the dialog behave, without hardcoding it into the dialog component?"*
+
+Without `mutationFn`, you're left with two worse options:
+
+- **Hardcode the API call inside `Confirm`** — now your generic yes/no dialog is coupled to one specific action; you'd need a different component for every mutation.
+- **Do the API call at the callsite, after `.call()` resolves** — but `call.end(true)` already fired on the "Yes" click, so the dialog closes *before* the mutation even starts. No pending spinner on the button, and if the API call fails, the user never sees it — the dialog is already gone.
+
+`mutationFn` lets the callsite inject the actual side effect while the dialog component stays generic (it just calls `useMutationFlow(call, mutationFn)` and gets `submit()` + `submit.pending` for free, whatever the mutation does). It also buys you, for free, what you'd otherwise hand-roll in every dialog:
+
+1. **`pending` state** — managed automatically (disable the button / show a spinner while the mutation is in flight).
+2. **The dialog stays open on failure** — only `mutationFn` can call `call.end()`, so a thrown error just leaves things as they are; the user can retry without the dialog flashing closed-then-reopened or losing form state.
 
 ```vue
 <script setup lang="ts">
