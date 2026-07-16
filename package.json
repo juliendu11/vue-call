@@ -1,0 +1,69 @@
+{
+  "name": "vue-call",
+  "version": "0.1.0",
+  "description": "Call your Vue components",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "files": ["dist"],
+  "module": "./dist/main.js",
+  "main": "./dist/main.cjs",
+  "types": "./dist/main.d.ts",
+  "typesVersions": {
+    "*": {
+      "mutation-flow": ["./dist/mutation-flow.d.ts"],
+      "host": ["./dist/host.d.ts"]
+    }
+  },
+  "exports": {
+    ".": {
+      "import": { "types": "./dist/main.d.ts", "default": "./dist/main.js" },
+      "require": {
+        "types": "./dist/main.d.cts",
+        "default": "./dist/main.cjs"
+      }
+    },
+    "./mutation-flow": {
+      "import": {
+        "types": "./dist/mutation-flow.d.ts",
+        "default": "./dist/mutation-flow.js"
+      },
+      "require": {
+        "types": "./dist/mutation-flow.d.cts",
+        "default": "./dist/mutation-flow.cjs"
+      }
+    },
+    "./host": {
+      "import": { "types": "./dist/host.d.ts", "default": "./dist/host.js" },
+      "require": {
+        "types": "./dist/host.d.cts",
+        "default": "./dist/host.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vite build",
+    "check:types": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "test:dev": "vitest"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^20.10.6",
+    "typescript": "^5.9.3",
+    "vite": "^7.1.12",
+    "vite-plugin-dts": "^4.5.4",
+    "vitest": "^3.2.4",
+    "vue": "^3.5.24",
+    "vue-tsc": "^3.1.4"
+  },
+  "peerDependencies": {
+    "vue": ">=3.3"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
