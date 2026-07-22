@@ -4,7 +4,7 @@
 </div>
 
 > [!NOTE]
-> This is a local Vue port of [react-call](https://github.com/desko27/react-call), cloning its API and behavior 1:1 where Vue's reactivity model allows it. It isn't published to npm — see [`../vue-call-test`](../vue-call-test) for a runnable example that aliases straight to this package's source.
+> This is a Vue port of [react-call](https://github.com/desko27/react-call), cloning its API and behavior 1:1 where Vue's reactivity model allows it. All credit for the original design goes to [@desko27](https://github.com/desko27) — see [`../vue-call-test`](../vue-call-test) for a runnable example.
 
 `createCallable()` turns a Vue component into something you can `await`.
 
@@ -42,25 +42,11 @@ menus, pickers — any UI that conceptually returns a value to its caller.
 
 # Getting started
 
-Not published to npm yet — for now, point your app at this package's source instead of installing it. The simplest way is a Vite alias (no build step, edits hot-reload):
-
-```ts
-// vite.config.ts
-import { fileURLToPath } from 'node:url'
-
-export default defineConfig({
-  resolve: {
-    alias: [
-      {
-        find: /^vue-call$/,
-        replacement: fileURLToPath(new URL('../vue-call/src/main.ts', import.meta.url)),
-      },
-    ],
-  },
-})
+```bash
+npm install @juliendu11/vue-call
 ```
 
-See [`../vue-call-test`](../vue-call-test) for a full working example, including the `vue-call/mutation-flow` and `vue-call/host` sub-path aliases.
+See [`../vue-call-test`](../vue-call-test) for a full working example, including the `@juliendu11/vue-call/mutation-flow` and `@juliendu11/vue-call/host` sub-path imports.
 
 We'll setup a confirmation dialog, but you can setup any component to be callable.
 
@@ -69,7 +55,7 @@ We'll setup a confirmation dialog, but you can setup any component to be callabl
 ```vue
 <!-- Confirm.vue -->
 <script setup lang="ts">
-import type { PropsWithCall } from 'vue-call'
+import type { PropsWithCall } from '@juliendu11/vue-call'
 
 defineProps<PropsWithCall<{ message: string }, boolean, {}>>()
 </script>
@@ -85,7 +71,7 @@ defineProps<PropsWithCall<{ message: string }, boolean, {}>>()
 
 ```ts
 // confirm.ts
-import { createCallable } from 'vue-call'
+import { createCallable } from '@juliendu11/vue-call'
 import ConfirmComponent from './Confirm.vue'
 
 export const Confirm = createCallable<{ message: string }, boolean>(ConfirmComponent)
@@ -252,7 +238,7 @@ Root props are reactive: change the value passed to `<Confirm userName="..." />`
 
 # Mutation flow
 
-Use `useMutationFlow` from `vue-call/mutation-flow` to wire the call to an async action. The composable manages `pending` for you, and because closing the call requires an explicit `call.end()`, a `mutationFn` that doesn't reach `end` leaves the dialog open — the user can retry without losing their place.
+Use `useMutationFlow` from `@juliendu11/vue-call/mutation-flow` to wire the call to an async action. The composable manages `pending` for you, and because closing the call requires an explicit `call.end()`, a `mutationFn` that doesn't reach `end` leaves the dialog open — the user can retry without losing their place.
 
 ## Why not just await `call()`?
 
@@ -273,8 +259,8 @@ Without `mutationFn`, you're left with two worse options:
 
 ```vue
 <script setup lang="ts">
-import type { PropsWithCall } from 'vue-call'
-import { useMutationFlow, type MutationFn } from 'vue-call/mutation-flow'
+import type { PropsWithCall } from '@juliendu11/vue-call'
+import { useMutationFlow, type MutationFn } from '@juliendu11/vue-call/mutation-flow'
 
 const props = defineProps<
   PropsWithCall<{ mutationFn: MutationFn<boolean> }, boolean, {}>
@@ -363,11 +349,11 @@ The payload is typed end-to-end — the trigger callsite and the handler share t
 
 Tools that render multiple stories side-by-side (Storybook's autodocs page, Histoire, …) create trouble if each story's decorator mounts `<Confirm />` — every preview registers its own listener, and `Confirm.call()` throws `Multiple instances of <Root> found!` the moment any preview's button is clicked.
 
-`vue-call/host` exposes a `mount()` helper that puts a single Root in a body-level `<div>` outside the previews. Call it once from your host's preview entry file (e.g. `.storybook/preview.ts`); your story decorators don't need to render Callables at all.
+`@juliendu11/vue-call/host` exposes a `mount()` helper that puts a single Root in a body-level `<div>` outside the previews. Call it once from your host's preview entry file (e.g. `.storybook/preview.ts`); your story decorators don't need to render Callables at all.
 
 ```ts
 // .storybook/preview.ts
-import { mount } from 'vue-call/host'
+import { mount } from '@juliendu11/vue-call/host'
 import { Confirm } from '../src/confirm'
 
 mount(Confirm)
@@ -392,7 +378,7 @@ provide('theme', 'light')
 ```
 
 ```ts
-import { mount } from 'vue-call/host'
+import { mount } from '@juliendu11/vue-call/host'
 import { Confirm } from '../src/confirm'
 import ThemeProvider from './ThemeProvider.vue'
 
@@ -449,7 +435,7 @@ If you specifically need this in a sandbox host (Storybook autodocs, Histoire, �
 You won't need them most likely, but if you want to split the component declaration and such, the public types are available as named exports:
 
 ```ts
-import type { UserComponent, CallContext } from 'vue-call'
+import type { UserComponent, CallContext } from '@juliendu11/vue-call'
 ```
 
 Type | Description
@@ -473,7 +459,7 @@ Multiple instances of \<Root> found! | You placed more than one Root, check the 
 If your callable carries a heavy payload (rich-text editor, chart library, big form), wrap it with Vue's `defineAsyncComponent` so the chunk only ships when the call fires.
 
 ```ts
-import { createCallable } from 'vue-call'
+import { createCallable } from '@juliendu11/vue-call'
 import { defineAsyncComponent } from 'vue'
 
 const Confirm = createCallable(

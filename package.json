@@ -1,8 +1,12 @@
 {
-  "name": "vue-call",
+  "name": "@juliendu11/vue-call",
   "version": "0.1.0",
-  "description": "Call your Vue components",
+  "description": "Call your Vue components like async functions — they resolve with a value.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/juliendu11/vue-call"
+  },
   "type": "module",
   "sideEffects": false,
   "files": ["dist"],
